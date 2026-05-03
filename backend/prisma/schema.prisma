@@ -24,6 +24,7 @@ model Candidate {
   educations        Education[]
   workExperiences   WorkExperience[]
   resumes           Resume[]
+  applications      application[]
 }
 
 model Education {
@@ -54,4 +55,117 @@ model Resume {
   uploadDate  DateTime
   candidateId Int
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+}
+
+model company {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(150)
+  description String?
+  employees   employee[]
+  positions   position[]
+}
+
+model employee {
+  id         Int         @id @default(autoincrement())
+  companyId  Int         @map("company_id")
+  name       String      @db.VarChar(150)
+  email      String      @unique @db.VarChar(255)
+  role       String      @db.VarChar(100)
+  isActive   Boolean     @default(true) @map("is_active")
+  company    company     @relation(fields: [companyId], references: [id])
+  interviews interview[]
+
+  @@index([companyId])
+}
+
+model interviewFlow {
+  id          Int             @id @default(autoincrement())
+  description String?
+  positions   position[]
+  steps       interviewStep[]
+}
+
+model interviewType {
+  id          Int             @id @default(autoincrement())
+  name        String          @db.VarChar(100)
+  description String?
+  steps       interviewStep[]
+}
+
+model position {
+  id                  Int             @id @default(autoincrement())
+  companyId           Int             @map("company_id")
+  interviewFlowId     Int             @map("interview_flow_id")
+  title               String          @db.VarChar(150)
+  description         String?
+  status              String          @db.VarChar(50)
+  isVisible           Boolean         @default(true) @map("is_visible")
+  location            String?         @db.VarChar(150)
+  jobDescription      String?         @map("job_description")
+  requirements        String?
+  responsibilities    String?
+  salaryMin           Decimal?        @map("salary_min") @db.Decimal(12, 2)
+  salaryMax           Decimal?        @map("salary_max") @db.Decimal(12, 2)
+  employmentType      String?         @map("employment_type") @db.VarChar(50)
+  benefits            String?
+  applicationDeadline DateTime?       @map("application_deadline")
+  contactInfo         String?         @map("contact_info") @db.VarChar(255)
+  company             company         @relation(fields: [companyId], references: [id])
+  interviewFlow       interviewFlow   @relation(fields: [interviewFlowId], references: [id])
+  applications        application[]
+
+  @@index([companyId])
+  @@index([interviewFlowId])
+  @@index([status, isVisible])
+}
+
+model interviewStep {
+  id              Int             @id @default(autoincrement())
+  interviewFlowId Int             @map("interview_flow_id")
+  interviewTypeId Int             @map("interview_type_id")
+  name            String          @db.VarChar(150)
+  orderIndex      Int             @map("order_index")
+  interviewFlow   interviewFlow   @relation(fields: [interviewFlowId], references: [id])
+  interviewType   interviewType   @relation(fields: [interviewTypeId], references: [id])
+  interviews      interview[]
+
+  @@index([interviewFlowId])
+  @@index([interviewTypeId])
+  @@unique([interviewFlowId, orderIndex])
+}
+
+model application {
+  id              Int          @id @default(autoincrement())
+  positionId      Int          @map("position_id")
+  candidateId     Int          @map("candidate_id")
+  applicationDate DateTime     @default(now()) @map("application_date")
+  status          String       @db.VarChar(50)
+  notes           String?
+  position        position     @relation(fields: [positionId], references: [id])
+  candidate       Candidate    @relation(fields: [candidateId], references: [id])
+  interviews      interview[]
+
+  @@index([positionId])
+  @@index([candidateId])
+  @@index([candidateId, positionId])
+  @@index([positionId, status])
+}
+
+model interview {
+  id              Int           @id @default(autoincrement())
+  applicationId   Int           @map("application_id")
+  interviewStepId Int           @map("interview_step_id")
+  employeeId      Int           @map("employee_id")
+  interviewDate   DateTime      @map("interview_date")
+  result          String?       @db.VarChar(50)
+  score           Int?
+  notes           String?
+  application     application   @relation(fields: [applicationId], references: [id])
+  interviewStep   interviewStep @relation(fields: [interviewStepId], references: [id])
+  employee        employee      @relation(fields: [employeeId], references: [id])
+
+  @@index([applicationId])
+  @@index([interviewStepId])
+  @@index([employeeId])
+  @@index([applicationId, interviewStepId])
 }
