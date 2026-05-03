@@ -58,3 +58,44 @@ el datasource y generator existentes."
 - Índices compuestos en application e interviewStep
 - Migración aplicada exitosamente
 - BD verificada en PGAdmin
+
+
+
+-- 1. Insertar empresa
+INSERT INTO company (name, description) 
+VALUES ('TechCorp SL', 'Empresa de tecnología líder en España');
+
+-- 2. Insertar empleado (reclutador)
+INSERT INTO employee (company_id, name, email, role, is_active)
+VALUES (1, 'María López', 'maria.lopez@techcorp.com', 'recruiter', true);
+
+-- 3. Insertar tipo de entrevista
+INSERT INTO "interviewType" (name, description)
+VALUES ('Técnica', 'Entrevista de habilidades técnicas');
+
+-- 4. Insertar flujo de entrevista
+INSERT INTO "interviewFlow" (description)
+VALUES ('Proceso estándar de selección tech');
+
+-- 5. Insertar paso del flujo
+INSERT INTO "interviewStep" (interview_flow_id, interview_type_id, name, order_index)
+VALUES (1, 1, 'Entrevista técnica inicial', 1);
+
+-- 6. Insertar posición
+INSERT INTO position (company_id, interview_flow_id, title, status, 
+  is_visible, location, salary_min, salary_max, employment_type)
+VALUES (1, 1, 'Backend Developer', 'open', true, 
+  'Madrid', 35000, 55000, 'full-time');
+
+-- 7. Insertar candidato
+INSERT INTO "Candidate" ("firstName", "lastName", email, phone)
+VALUES ('Carlos', 'Martínez', 'carlos@email.com', '612345678');
+
+-- 8. Insertar aplicación
+INSERT INTO application (position_id, candidate_id, status)
+VALUES (1, 1, 'in_progress');
+
+-- 9. Insertar entrevista
+INSERT INTO interview (application_id, interview_step_id, 
+  employee_id, interview_date, result, score)
+VALUES (1, 1, 1, '2026-05-10 10:00:00', 'pending', null);
