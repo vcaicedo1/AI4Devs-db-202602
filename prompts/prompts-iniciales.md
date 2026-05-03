@@ -60,7 +60,7 @@ el datasource y generator existentes."
 - BD verificada en PGAdmin
 
 
-
+## Inserts para test
 -- 1. Insertar empresa
 INSERT INTO company (name, description) 
 VALUES ('TechCorp SL', 'Empresa de tecnología líder en España');
@@ -99,3 +99,49 @@ VALUES (1, 1, 'in_progress');
 INSERT INTO interview (application_id, interview_step_id, 
   employee_id, interview_date, result, score)
 VALUES (1, 1, 1, '2026-05-10 10:00:00', 'pending', null);
+
+## Select para test
+-- 1. Ver todos los candidatos con sus aplicaciones y posición
+SELECT 
+  c."firstName", 
+  c."lastName", 
+  c.email,
+  p.title as posicion,
+  a.status as estado_aplicacion,
+  a.application_date
+FROM "Candidate" c
+JOIN application a ON a.candidate_id = c.id
+JOIN position p ON p.id = a.position_id;
+
+-- 2. Ver el flujo completo de entrevistas de un candidato
+SELECT 
+  c."firstName",
+  c."lastName",
+  p.title as posicion,
+  ist.name as paso_entrevista,
+  ist.order_index,
+  i.interview_date,
+  i.result,
+  i.score,
+  e.name as entrevistador
+FROM interview i
+JOIN application a ON a.id = i.application_id
+JOIN "Candidate" c ON c.id = a.candidate_id
+JOIN position p ON p.id = a.position_id
+JOIN "interviewStep" ist ON ist.id = i.interview_step_id
+JOIN employee e ON e.id = i.employee_id;
+
+-- 3. Posiciones abiertas con rango salarial
+SELECT 
+  p.title,
+  p.location,
+  p.employment_type,
+  p.salary_min,
+  p.salary_max,
+  co.name as empresa,
+  COUNT(a.id) as total_aplicaciones
+FROM position p
+JOIN company co ON co.id = p.company_id
+LEFT JOIN application a ON a.position_id = p.id
+WHERE p.status = 'open' AND p.is_visible = true
+GROUP BY p.id, co.name;
